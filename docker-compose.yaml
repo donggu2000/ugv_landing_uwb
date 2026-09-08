@@ -1,0 +1,28 @@
+services:
+  sim:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    image: ugv_landing_sim:humble
+    container_name: ugv_landing_sim
+    network_mode: host
+    ipc: host
+    privileged: true
+    gpus: all
+    environment:
+      DISPLAY: ${DISPLAY}
+      QT_X11_NO_MITSHM: "1"
+      NVIDIA_VISIBLE_DEVICES: all
+      NVIDIA_DRIVER_CAPABILITIES: all
+      XDG_RUNTIME_DIR: /tmp/runtime-root
+      GZ_SIM_RESOURCE_PATH: /workspaces/ugv_landing_sim/src/ugv_landing_sim/worlds:/workspaces/ugv_landing_sim/src/ugv_landing_sim/models
+      IGN_GAZEBO_RESOURCE_PATH: /workspaces/ugv_landing_sim/src/ugv_landing_sim/worlds:/workspaces/ugv_landing_sim/src/ugv_landing_sim/models
+    volumes:
+      - /tmp/.X11-unix:/tmp/.X11-unix:rw
+      - /dev:/dev
+      - .:/workspaces/ugv_landing_sim
+      - ${HOME}/.Xauthority:/root/.Xauthority:ro
+    working_dir: /workspaces/ugv_landing_sim
+    stdin_open: true
+    tty: true
+    command: /bin/bash

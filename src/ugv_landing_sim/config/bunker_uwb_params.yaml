@@ -1,0 +1,76 @@
+anchor_marker_publisher:
+  ros__parameters:
+    frame_id: bunker_base
+    marker_topic: /uwb/anchor_markers
+    publish_rate_hz: 5.0
+
+    # DWM1001 network coordinates read from each anchor with dwm_loc_get.
+    # Use x/y only; z is drawn as 0 in RViz.
+    anchor_ids: ["A0", "A1", "A2", "A3"]
+    anchor_names: [
+      "right_top 000760154674",
+      "right_bottom 210400146A",
+      "left_bottom 2104001DDC",
+      "left_top 2111001BC4"
+    ]
+    anchor_positions: [
+      1.00, 1.00, 0.00,
+      1.00, 0.00, 0.00,
+      0.00, 0.00, 0.00,
+      0.00, 1.00, 0.00
+    ]
+
+    # Keep the connected USB paths here for later tag/anchor serial work.
+    anchor_ports: [
+      "/dev/serial/by-id/usb-SEGGER_J-Link_000760154674-if00",
+      "/dev/serial/by-id/usb-SEGGER_J-Link_000760154625-if00",
+      "/dev/serial/by-id/usb-SEGGER_J-Link_000760154382-if00",
+      "/dev/serial/by-id/usb-SEGGER_J-Link_000760217846-if00"
+    ]
+
+    anchor_radius_m: 0.07
+    label_z_offset_m: 0.16
+    draw_anchor_square: true
+
+dwm_tag_serial_publisher:
+  ros__parameters:
+    frame_id: bunker_base
+    tag_port: "/dev/serial/by-id/usb-SEGGER_J-Link_000760217793-if00"
+    baudrate: 115200
+    serial_timeout_s: 0.2
+    reconnect_delay_s: 1.0
+    serial_stale_timeout_s: 3.0
+
+    # Poll the DWM1001C binary TLV API for position.
+    serial_mode: "tlv"
+    poll_rate_hz: 10.0
+    enter_shell: false
+    location_command: "lec"
+
+    # 2D mode: publish incoming tag x/y and force z to tag_z_m.
+    force_2d: true
+    tag_z_m: 0.0
+    xy_transform: "swap_invert_unit"
+
+    pose_topic: /uwb/tag_pose
+    marker_topic: /uwb/tag_markers
+    raw_topic: /uwb/tag_raw
+    udp_enabled: false
+    udp_host: "10.99.40.20"
+    udp_port: 5005
+    tag_radius_m: 0.08
+    label_z_offset_m: 0.16
+    center_x_m: 0.5
+    center_y_m: 0.5
+    center_z_m: 0.0
+    distance_label_z_offset_m: 0.12
+
+udp_tag_receiver:
+  ros__parameters:
+    frame_id: bunker_base
+    listen_host: "0.0.0.0"
+    udp_port: 5005
+    pose_topic: /uwb/tag_pose
+    marker_topic: /uwb/tag_markers
+    tag_radius_m: 0.08
+    label_z_offset_m: 0.16

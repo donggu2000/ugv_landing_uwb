@@ -1,0 +1,31 @@
+uwb_range_simulator:
+  ros__parameters:
+    frame_id: world
+    tag_pose_topic: /x500/tag_pose
+    ugv_pose_topic: /ugv/pose
+    ranges_topic: /uwb/ranges
+    decawave_topic: /uwb/decawave_string
+    marker_topic: /uwb/markers
+    publish_rate_hz: 20.0
+    noise_stddev_m: 0.03
+    range_bias_m: 0.0
+    anchor_ids: ["5478", "2479", "4248", "f678"]
+    anchor_positions_ugv: [
+      0.85, 0.85, 0.35,
+      0.85, -0.85, 0.35,
+      -0.85, -0.85, 0.35,
+      -0.85, 0.85, 0.35
+    ]
+
+trilateration_estimator:
+  ros__parameters:
+    frame_id: world
+    ranges_topic: /uwb/ranges
+    estimate_topic: /uwb/tag_pose_estimate
+
+demo_pose_publisher:
+  ros__parameters:
+    frame_id: world
+    ugv_pose_topic: /ugv/pose
+    tag_pose_topic: /x500/tag_pose
+    publish_rate_hz: 30.0
