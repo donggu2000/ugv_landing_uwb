@@ -157,3 +157,141 @@ https://github.com/Xpect8tions/Decawave-ros-data-sim
 ```
 
 그 repo의 `/output` 문자열 방식은 `/uwb/decawave_string` 토픽으로 비슷하게 남겨두었습니다. 실제 제어/추정에는 파싱이 쉬운 `/uwb/ranges`를 먼저 쓰는 편이 안전합니다.
+
+---
+
+# English Version
+
+This repository is a ROS 2 workspace for UWB-based tag localization and RViz visualization for Bunker Pro drone landing experiments.
+
+The current real-hardware setup uses four DWM1001C boards as anchors and one DWM1001C board as a tag. The anchors are arranged as a 1 m x 1 m square, and the tag position is visualized in RViz using only the x/y plane. The z value is forced to `0.0 m`.
+
+## Features
+
+- RViz visualization of four fixed UWB anchors
+- DWM1001C tag serial reader using the binary TLV API
+- `/uwb/tag_pose` publisher for the estimated tag position
+- `/uwb/tag_markers` publisher for the tag marker, label, center-to-tag line, and distance text
+- 2D distance display from the square center to the tag
+- Gazebo Sim world and PX4 X500 model files for later simulation work
+
+## Current Anchor Layout
+
+The anchor square is defined in `bunker_base` frame:
+
+```text
+A3 left_top      (0.0, 1.0, 0.0)
+A0 right_top     (1.0, 1.0, 0.0)
+A2 left_bottom   (0.0, 0.0, 0.0)
+A1 right_bottom  (1.0, 0.0, 0.0)
+```
+
+The square center is:
+
+```text
+(0.5, 0.5, 0.0)
+```
+
+The center-to-tag distance is calculated in 2D:
+
+```text
+distance = sqrt((tag_x - 0.5)^2 + (tag_y - 0.5)^2)
+```
+
+## Hardware Mapping
+
+```text
+A0 right_top:     2104003357 / J-Link 000760154674
+A1 right_bottom:  210400146A / J-Link 000760154625
+A2 left_bottom:   2104001DDC / J-Link 000760154382
+A3 left_top:      2111001BC4 / J-Link 000760217846
+Tag:              J-Link 000760217793
+```
+
+The tag is expected at:
+
+```text
+/dev/serial/by-id/usb-SEGGER_J-Link_000760217793-if00
+```
+
+## Build
+
+On the laptop:
+
+```bash
+cd /home/hyeon/ugv_landing_sim
+source /opt/ros/humble/setup.bash
+colcon build --symlink-install --base-paths src/ugv_landing_sim --packages-select ugv_landing_sim
+source install/setup.bash
+```
+
+## Run Laptop-Only RViz Visualization
+
+Use this mode when the tag is connected directly to the laptop.
+
+```bash
+cd /home/hyeon/ugv_landing_sim
+source /opt/ros/humble/setup.bash
+source install/setup.bash
+
+export ROS_DOMAIN_ID=10
+export ROS_LOCALHOST_ONLY=1
+unset ROS_DISCOVERY_SERVER
+
+ros2 launch ugv_landing_sim bunker_uwb_viz.launch.py use_tag:=true
+```
+
+The four anchors only need power if they have already been configured and saved as anchors. They do not need to be connected to the laptop during tag localization.
+
+## Useful Topics
+
+```bash
+ros2 topic echo /uwb/tag_raw
+ros2 topic echo /uwb/tag_pose
+ros2 topic echo /uwb/tag_markers
+ros2 topic echo /uwb/anchor_markers
+```
+
+## Configuration
+
+Anchor positions, serial ports, tag display settings, and center-distance display settings are stored here:
+
+```text
+src/ugv_landing_sim/config/bunker_uwb_params.yaml
+```
+
+Important tag settings:
+
+```yaml
+serial_mode: "tlv"
+force_2d: true
+tag_z_m: 0.0
+xy_transform: "swap_invert_unit"
+center_x_m: 0.5
+center_y_m: 0.5
+center_z_m: 0.0
+```
+
+## Simulation
+
+Run the Gazebo Sim world:
+
+```bash
+ros2 launch ugv_landing_sim sim.launch.py
+```
+
+Run the UWB demo without real hardware:
+
+```bash
+ros2 launch ugv_landing_sim uwb_demo.launch.py
+```
+
+## Reference
+
+This project was inspired by:
+
+```text
+https://github.com/Xpect8tions/Decawave-ros-data-sim
+```
+
+The referenced repository focuses on generating, parsing, and visualizing Decawave-style UWB data. This workspace adapts the idea for Bunker Pro UWB anchor visualization, DWM1001C tag reading, and future Gazebo/PX4 integration.
